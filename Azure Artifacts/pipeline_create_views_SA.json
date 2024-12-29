@@ -1,0 +1,344 @@
+{
+    "name": "Create views",
+    "properties": {
+        "activities": [
+            {
+                "name": "Get Sales Tables",
+                "type": "GetMetadata",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "Sales_tables_dataset",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "sales": {
+                                "value": "@variables('sales')",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "fieldList": [
+                        "childItems"
+                    ],
+                    "storeSettings": {
+                        "type": "AzureBlobFSReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                    },
+                    "formatSettings": {
+                        "type": "BinaryReadSettings"
+                    }
+                }
+            },
+            {
+                "name": "Create View for each Sales Table",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "Get Sales Tables",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('Get Sales Tables').output.childItems",
+                        "type": "Expression"
+                    },
+                    "activities": [
+                        {
+                            "name": "Create views for Sales",
+                            "type": "SqlServerStoredProcedure",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.12:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "storedProcedureName": "[dbo].[CreateSQLServerlessView_gold]",
+                                "storedProcedureParameters": {
+                                    "ViewName": {
+                                        "value": {
+                                            "value": "@item().name",
+                                            "type": "Expression"
+                                        },
+                                        "type": "String"
+                                    },
+                                    "SchemaName": {
+                                        "value": {
+                                            "value": "@variables('sales')",
+                                            "type": "Expression"
+                                        },
+                                        "type": "String"
+                                    }
+                                }
+                            },
+                            "linkedServiceName": {
+                                "referenceName": "ServerlessSQLDB",
+                                "type": "LinkedServiceReference"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Get Production Tables",
+                "type": "GetMetadata",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "Production_table_dataset",
+                        "type": "DatasetReference",
+                        "parameters": {
+                            "production": {
+                                "value": "@variables('production')",
+                                "type": "Expression"
+                            }
+                        }
+                    },
+                    "fieldList": [
+                        "childItems"
+                    ],
+                    "storeSettings": {
+                        "type": "AzureBlobFSReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                    },
+                    "formatSettings": {
+                        "type": "BinaryReadSettings"
+                    }
+                }
+            },
+            {
+                "name": "Create View for each Production Table",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "Get Production Tables",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('Get Production Tables').output.childItems",
+                        "type": "Expression"
+                    },
+                    "activities": [
+                        {
+                            "name": "Create views for Production",
+                            "type": "SqlServerStoredProcedure",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.12:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "storedProcedureName": "[dbo].[CreateSQLServerlessView_gold]",
+                                "storedProcedureParameters": {
+                                    "ViewName": {
+                                        "value": {
+                                            "value": "@item().name",
+                                            "type": "Expression"
+                                        },
+                                        "type": "String"
+                                    },
+                                    "SchemaName": {
+                                        "value": {
+                                            "value": "@variables('production')",
+                                            "type": "Expression"
+                                        },
+                                        "type": "String"
+                                    }
+                                }
+                            },
+                            "linkedServiceName": {
+                                "referenceName": "ServerlessSQLDB",
+                                "type": "LinkedServiceReference"
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Sales comparison",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Create View for each Sales Table",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    },
+                    {
+                        "activity": "Create View for each Production Table",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[CreateSQLServerlessView_salesComparison]",
+                    "storedProcedureParameters": {
+                        "ViewName": {
+                            "value": "MonthlyYearlySalesComparison",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ServerlessSQLDB",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Revenue trends",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Sales comparison",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[CreateSQLServerlessView_revenueTrends]",
+                    "storedProcedureParameters": {
+                        "ViewName": {
+                            "value": "RevenueTrends",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ServerlessSQLDB",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Best selling products",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Revenue trends",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[CreateSQLServerlessView_BestSellingProducts]",
+                    "storedProcedureParameters": {
+                        "ViewName": {
+                            "value": "BestSellingProducts",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ServerlessSQLDB",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Sales by territory",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Best selling products",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[CreateSQLServerlessView_salesByTerritory]",
+                    "storedProcedureParameters": {
+                        "ViewName": {
+                            "value": "SalesByTerritory",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ServerlessSQLDB",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "variables": {
+            "sales": {
+                "type": "String",
+                "defaultValue": "Sales"
+            },
+            "production": {
+                "type": "String",
+                "defaultValue": "Production"
+            }
+        },
+        "annotations": [],
+        "lastPublishTime": "2024-12-17T14:57:58Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}
