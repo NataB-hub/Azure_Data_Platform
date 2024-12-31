@@ -11,11 +11,9 @@ DECLARE @statement VARCHAR(MAX)
     SET @statement = N'CREATE OR ALTER VIEW ' + @ViewName + ' AS
         SELECT 
             CAST(SOH.OrderDate AS DATE) AS SalesDate,
-            SUM(SOD.LineTotal) AS DailyRevenue
+            SUM(SOH.SubTotal) AS DailyRevenue
         FROM 
             SalesOrderHeader SOH
-        JOIN 
-            SalesOrderDetail SOD ON SOH.SalesOrderID = SOD.SalesOrderID
         GROUP BY 
             CAST(SOH.OrderDate AS DATE);'
 

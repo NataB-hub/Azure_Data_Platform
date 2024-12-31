@@ -10,16 +10,16 @@ DECLARE @statement VARCHAR(MAX)
 
     SET @statement = N'CREATE OR ALTER VIEW ' + @ViewName + ' AS
         SELECT 
-            T.Name AS TerritoryName,
-            SUM(SOD.LineTotal) AS TotalRevenue
+        T.Name AS TerritoryName,
+        T.CountryRegionCode AS Country,
+        YEAR(SOH.OrderDate) AS Year,
+        SUM(SOH.SubTotal) AS AnnualRevenue
         FROM 
             SalesOrderHeader SOH
         JOIN 
-            SalesOrderDetail SOD ON SOH.SalesOrderID = SOD.SalesOrderID
-        JOIN 
             SalesTerritory T ON SOH.TerritoryID = T.TerritoryID
         GROUP BY 
-            T.Name;'
+            T.Name, T.CountryRegionCode, YEAR(SOH.OrderDate);'
 
 EXEC (@statement)
 

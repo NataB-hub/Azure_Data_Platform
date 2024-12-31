@@ -12,14 +12,16 @@ DECLARE @statement VARCHAR(MAX)
         SELECT 
             YEAR(SOH.OrderDate) AS Year,
             MONTH(SOH.OrderDate) AS Month,
-            CAST(ROUND(SUM(SOD.LineTotal), 2) AS DECIMAL(18,2)) AS MonthlyRevenue,
-            CAST(ROUND(SUM(SUM(SOD.LineTotal)) OVER (PARTITION BY YEAR(SOH.OrderDate)), 2) AS DECIMAL(18,2)) AS YearlyRevenue
-        FROM 
-            SalesOrderHeader SOH
-        JOIN 
-            SalesOrderDetail SOD ON SOH.SalesOrderID = SOD.SalesOrderID
-        GROUP BY 
-            YEAR(SOH.OrderDate), MONTH(SOH.OrderDate);'
+            CAST(ROUND(SUM(SOH.SubTotal), 2) AS DECIMAL(18,2)) AS MonthlyRevenue,
+            CAST(ROUND(SUM(SUM(SOH.SubTotal)) OVER (
+                PARTITION BY YEAR(SOH.OrderDate) 
+                ORDER BY MONTH(SOH.OrderDate)
+            ), 2) AS DECIMAL(18,2)) AS CumulativeYearlyRevenue
+            FROM 
+                dbo.SalesOrderHeader SOH
+            GROUP BY 
+                YEAR(SOH.OrderDate), 
+                MONTH(SOH.OrderDate);'
 
 EXEC (@statement)
 

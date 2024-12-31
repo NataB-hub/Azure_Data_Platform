@@ -325,6 +325,39 @@
                     "referenceName": "ServerlessSQLDB",
                     "type": "LinkedServiceReference"
                 }
+            },
+            {
+                "name": "Online Orders",
+                "type": "SqlServerStoredProcedure",
+                "dependsOn": [
+                    {
+                        "activity": "Sales by territory",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "storedProcedureName": "[dbo].[CreateSQLServerlessView_onlineOrders]",
+                    "storedProcedureParameters": {
+                        "ViewName": {
+                            "value": "OnlineOrders",
+                            "type": "String"
+                        }
+                    }
+                },
+                "linkedServiceName": {
+                    "referenceName": "ServerlessSQLDB",
+                    "type": "LinkedServiceReference"
+                }
             }
         ],
         "variables": {
@@ -338,7 +371,7 @@
             }
         },
         "annotations": [],
-        "lastPublishTime": "2024-12-17T14:57:58Z"
+        "lastPublishTime": "2024-12-30T17:54:25Z"
     },
     "type": "Microsoft.Synapse/workspaces/pipelines"
 }
