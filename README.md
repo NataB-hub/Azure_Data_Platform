@@ -13,14 +13,15 @@ Track and visualize the company's sales performance.
 ### Key Visuals
 
 * Revenue trends over time (line chart).
-* Top 10 best-selling products (bar chart).
+* Top 3 best-selling products and Top 3 lowest-selling products (bar chart).
 * Sales by territory (map visualization).
 * Monthly vs. yearly sales comparison (combo chart).
+* Orders by Year and Sales Channel (bar chart).
 
 ### Insights
 
 * Identify seasonal trends in sales.
-* Analyze performance by sales territory.
+* Analyze performance by sales territory and sales channel.
 * Spot the most and least profitables products.
 
 ## Architecture Overview
@@ -49,5 +50,6 @@ Track and visualize the company's sales performance.
 ## Supporting Documents
 
 * Architecture Diagram is in the `Documentation` folder
+* Power BI Dashboard's screenshot in the `Documentation` folder
 * SQL Scripts is in the `SQL_Scripts` folder
 * Screenshots in the `Screenshots` folder
